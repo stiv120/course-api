@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-@DisplayName("Tests para PrimeNumberGenerator")
+@DisplayName("Tests for PrimeNumberGenerator")
 class PrimeNumberGeneratorTest {
     
     @Test
-    @DisplayName("Debería retornar false para números menores a 2")
+    @DisplayName("Should return false for numbers less than 2")
     void testIsPrime_WithNumbersLessThan2() {
         assertFalse(PrimeNumberGenerator.isPrime(0));
         assertFalse(PrimeNumberGenerator.isPrime(1));
@@ -18,13 +18,13 @@ class PrimeNumberGeneratorTest {
     }
     
     @Test
-    @DisplayName("Debería retornar true para el número 2")
+    @DisplayName("Should return true for number 2")
     void testIsPrime_WithNumber2() {
         assertTrue(PrimeNumberGenerator.isPrime(2));
     }
     
     @Test
-    @DisplayName("Debería identificar correctamente números primos")
+    @DisplayName("Should correctly identify prime numbers")
     void testIsPrime_WithPrimeNumbers() {
         assertTrue(PrimeNumberGenerator.isPrime(3));
         assertTrue(PrimeNumberGenerator.isPrime(5));
@@ -37,7 +37,7 @@ class PrimeNumberGeneratorTest {
     }
     
     @Test
-    @DisplayName("Debería identificar correctamente números no primos")
+    @DisplayName("Should correctly identify non-prime numbers")
     void testIsPrime_WithNonPrimeNumbers() {
         assertFalse(PrimeNumberGenerator.isPrime(4));
         assertFalse(PrimeNumberGenerator.isPrime(6));
@@ -49,7 +49,7 @@ class PrimeNumberGeneratorTest {
     }
     
     @Test
-    @DisplayName("Debería generar los primeros 10 números primos correctamente")
+    @DisplayName("Should generate the first 10 prime numbers correctly")
     void testGenerateFirstNPrimes_With10() {
         List<Integer> primes = PrimeNumberGenerator.generateFirstNPrimes(10);
         
@@ -67,7 +67,7 @@ class PrimeNumberGeneratorTest {
     }
     
     @Test
-    @DisplayName("Debería generar los primeros 5 números primos")
+    @DisplayName("Should generate the first 5 prime numbers")
     void testGenerateFirstNPrimes_With5() {
         List<Integer> primes = PrimeNumberGenerator.generateFirstNPrimes(5);
         
@@ -76,18 +76,17 @@ class PrimeNumberGeneratorTest {
     }
     
     @Test
-    @DisplayName("Debería retornar lista vacía para n = 0")
+    @DisplayName("Should return empty list for n = 0")
     void testGenerateFirstNPrimes_WithZero() {
         List<Integer> primes = PrimeNumberGenerator.generateFirstNPrimes(0);
         assertTrue(primes.isEmpty());
     }
     
     @Test
-    @DisplayName("Debería generar un solo número primo para n = 1")
+    @DisplayName("Should generate a single prime number for n = 1")
     void testGenerateFirstNPrimes_WithOne() {
         List<Integer> primes = PrimeNumberGenerator.generateFirstNPrimes(1);
         assertEquals(1, primes.size());
         assertEquals(2, primes.get(0));
     }
 }
-

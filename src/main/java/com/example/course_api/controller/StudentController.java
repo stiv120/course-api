@@ -3,6 +3,7 @@ package com.example.course_api.controller;
 import com.example.course_api.entity.Student;
 import com.example.course_api.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -10,12 +11,17 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@RestController("controllerStudentController")
 @RequestMapping(path = "api/v1/students")
+@ConditionalOnProperty(name = "app.controller.enabled", havingValue = "true", matchIfMissing = false)
 public class StudentController {
 
+    private final StudentService studentService;
+
     @Autowired
-    private StudentService studentService;
+    public StudentController(final StudentService studentService) {
+        this.studentService = studentService;
+    }
 
     @GetMapping
     public List<Student> getAll(){
@@ -40,7 +46,8 @@ public class StudentController {
     }
 
     @DeleteMapping("/{studentId}")
-    public void saveOrUpdate(@PathVariable("studentId") Long studentId){
+    public ResponseEntity<Void> deleteStudent(@PathVariable("studentId") final Long studentId) {
         studentService.delete(studentId);
+        return ResponseEntity.noContent().build();
     }
 }

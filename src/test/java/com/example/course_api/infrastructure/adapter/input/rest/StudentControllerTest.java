@@ -3,7 +3,6 @@ package com.example.course_api.infrastructure.adapter.input.rest;
 import com.example.course_api.application.port.input.StudentUseCase;
 import com.example.course_api.domain.model.Student;
 import com.example.course_api.infrastructure.adapter.input.rest.dto.StudentRequest;
-import com.example.course_api.infrastructure.adapter.input.rest.dto.StudentResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
 })
 @Import(GlobalExceptionHandler.class)
-@DisplayName("Tests para StudentController (Arquitectura Hexagonal)")
+@DisplayName("Tests for StudentController (Hexagonal Architecture)")
 class StudentControllerTest {
 
     @Autowired
@@ -50,7 +49,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/students - Debería retornar lista de estudiantes")
+    @DisplayName("GET /api/v1/students - Should return list of students")
+    @SuppressWarnings("null") // MediaType.APPLICATION_JSON is a Spring constant, guaranteed non-null
     void testGetAllStudents() throws Exception {
         List<Student> students = Arrays.asList(testStudent);
         when(studentUseCase.getAllStudents()).thenReturn(students);
@@ -67,7 +67,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/students/{id} - Debería retornar un estudiante por ID")
+    @DisplayName("GET /api/v1/students/{id} - Should return a student by ID")
+    @SuppressWarnings("null") // MediaType.APPLICATION_JSON is a Spring constant, guaranteed non-null
     void testGetStudentById() throws Exception {
         when(studentUseCase.getStudentById(1L)).thenReturn(Optional.of(testStudent));
 
@@ -83,7 +84,7 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/students/{id} - Debería retornar 404 si el estudiante no existe")
+    @DisplayName("GET /api/v1/students/{id} - Should return 404 if student does not exist")
     void testGetStudentById_NotFound() throws Exception {
         when(studentUseCase.getStudentById(999L)).thenReturn(Optional.empty());
 
@@ -94,7 +95,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/students - Debería crear un estudiante exitosamente")
+    @DisplayName("POST /api/v1/students - Should create a student successfully")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testCreateStudent() throws Exception {
         StudentRequest request = new StudentRequest("María", "González", "maria.gonzalez@email.com");
         Student created = new Student(1L, "María", "González", "maria.gonzalez@email.com");
@@ -112,7 +114,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/students - Debería retornar 400 si los datos son inválidos")
+    @DisplayName("POST /api/v1/students - Should return 400 if data is invalid")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testCreateStudent_InvalidData() throws Exception {
         StudentRequest invalidRequest = new StudentRequest("", "", "invalid-email");
 
@@ -125,7 +128,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/v1/students/{id} - Debería actualizar un estudiante exitosamente")
+    @DisplayName("PUT /api/v1/students/{id} - Should update a student successfully")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testUpdateStudent() throws Exception {
         StudentRequest request = new StudentRequest("Pedro", "García", "pedro.garcia@email.com");
         Student updated = new Student(1L, "Pedro", "García", "pedro.garcia@email.com");
@@ -142,7 +146,7 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/v1/students/{id} - Debería eliminar un estudiante")
+    @DisplayName("DELETE /api/v1/students/{id} - Should delete a student")
     void testDeleteStudent() throws Exception {
         doNothing().when(studentUseCase).deleteStudent(1L);
 
@@ -152,4 +156,3 @@ class StudentControllerTest {
         verify(studentUseCase, times(1)).deleteStudent(1L);
     }
 }
-

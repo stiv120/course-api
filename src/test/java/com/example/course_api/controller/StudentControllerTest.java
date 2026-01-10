@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,8 +23,15 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(StudentController.class)
-@DisplayName("Tests para StudentController")
+@WebMvcTest(
+        controllers = StudentController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+        },
+        properties = {"app.controller.enabled=true"}
+)
+@Import(ControllerTestConfiguration.class)
+@DisplayName("Tests for StudentController")
 class StudentControllerTest {
 
     @Autowired
@@ -47,7 +55,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/students - Debería retornar lista de estudiantes")
+    @DisplayName("GET /api/v1/students - Should return list of students")
+    @SuppressWarnings("null") // MediaType.APPLICATION_JSON is a Spring constant, guaranteed non-null
     void testGetAllStudents() throws Exception {
         List<Student> students = Arrays.asList(testStudent);
         when(studentService.getStudents()).thenReturn(students);
@@ -64,7 +73,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/students/{id} - Debería retornar un estudiante por ID")
+    @DisplayName("GET /api/v1/students/{id} - Should return a student by ID")
+    @SuppressWarnings("null") // MediaType.APPLICATION_JSON is a Spring constant, guaranteed non-null
     void testGetStudentById() throws Exception {
         when(studentService.getStudent(1L)).thenReturn(Optional.of(testStudent));
 
@@ -80,7 +90,7 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/students/{id} - Debería retornar 200 aunque el estudiante no exista")
+    @DisplayName("GET /api/v1/students/{id} - Should return 200 even if student does not exist")
     void testGetStudentById_NotFound() throws Exception {
         when(studentService.getStudent(999L)).thenReturn(Optional.empty());
 
@@ -91,7 +101,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/students - Debería crear un estudiante exitosamente")
+    @DisplayName("POST /api/v1/students - Should create a student successfully")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testCreateStudent() throws Exception {
         Student newStudent = new Student();
         newStudent.setFirstName("María");
@@ -109,11 +120,12 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/students - Debería retornar 400 si los datos son inválidos")
+    @DisplayName("POST /api/v1/students - Should return 400 if data is invalid")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testCreateStudent_InvalidData() throws Exception {
         Student invalidStudent = new Student();
-        invalidStudent.setFirstName(""); // Campo vacío
-        invalidStudent.setEmail("invalid-email"); // Email inválido
+        invalidStudent.setFirstName("");
+        invalidStudent.setEmail("invalid-email");
 
         mockMvc.perform(post("/api/v1/students")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +136,8 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/v1/students/{id} - Debería actualizar un estudiante exitosamente")
+    @DisplayName("PUT /api/v1/students/{id} - Should update a student successfully")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testUpdateStudent() throws Exception {
         Student updatedStudent = new Student();
         updatedStudent.setFirstName("Pedro");
@@ -142,10 +155,11 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/v1/students/{id} - Debería retornar 400 si los datos son inválidos")
+    @DisplayName("PUT /api/v1/students/{id} - Should return 400 if data is invalid")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testUpdateStudent_InvalidData() throws Exception {
         Student invalidStudent = new Student();
-        invalidStudent.setFirstName(""); // Campo vacío
+        invalidStudent.setFirstName("");
 
         mockMvc.perform(put("/api/v1/students/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -156,7 +170,7 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/v1/students/{id} - Debería eliminar un estudiante")
+    @DisplayName("DELETE /api/v1/students/{id} - Should delete a student")
     void testDeleteStudent() throws Exception {
         doNothing().when(studentService).delete(1L);
 
@@ -167,7 +181,7 @@ class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/students - Debería retornar lista vacía cuando no hay estudiantes")
+    @DisplayName("GET /api/v1/students - Should return empty list when there are no students")
     void testGetAllStudents_EmptyList() throws Exception {
         when(studentService.getStudents()).thenReturn(List.of());
 
@@ -179,4 +193,3 @@ class StudentControllerTest {
         verify(studentService, times(1)).getStudents();
     }
 }
-

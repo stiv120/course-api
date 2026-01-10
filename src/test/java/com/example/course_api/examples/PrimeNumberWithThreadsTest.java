@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.TimeUnit;
 
-@DisplayName("Tests para PrimeNumberWithThreads")
+@DisplayName("Tests for PrimeNumberWithThreads")
 class PrimeNumberWithThreadsTest {
     
     @Test
-    @DisplayName("Debería encontrar números primos usando threads")
+    @DisplayName("Should find prime numbers using threads")
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     void testFindPrimesWithThreads() {
         assertDoesNotThrow(() -> {
@@ -20,7 +20,7 @@ class PrimeNumberWithThreadsTest {
     }
     
     @Test
-    @DisplayName("Debería completar la búsqueda secuencial sin errores")
+    @DisplayName("Should complete sequential search without errors")
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
     void testFindPrimesSequential() {
         assertDoesNotThrow(() -> {
@@ -29,7 +29,7 @@ class PrimeNumberWithThreadsTest {
     }
     
     @Test
-    @DisplayName("Debería manejar correctamente el caso con 1 thread")
+    @DisplayName("Should handle the case with 1 thread correctly")
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     void testFindPrimesWithSingleThread() {
         assertDoesNotThrow(() -> {
@@ -37,4 +37,3 @@ class PrimeNumberWithThreadsTest {
         });
     }
 }
-

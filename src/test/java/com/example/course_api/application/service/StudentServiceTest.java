@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Tests para StudentService (Arquitectura Hexagonal)")
+@DisplayName("Tests for StudentService (Hexagonal Architecture)")
 class StudentServiceTest {
     
     @Mock
@@ -43,7 +43,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería retornar todos los estudiantes")
+    @DisplayName("Should return all students")
     void testGetAllStudents() {
         List<Student> students = Arrays.asList(testStudent);
         when(studentRepositoryPort.findAll()).thenReturn(students);
@@ -56,7 +56,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería retornar un estudiante por ID")
+    @DisplayName("Should return a student by ID")
     void testGetStudentById() {
         when(studentRepositoryPort.findById(1L)).thenReturn(Optional.of(testStudent));
         
@@ -68,7 +68,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería retornar Optional vacío si el estudiante no existe")
+    @DisplayName("Should return empty Optional if student does not exist")
     void testGetStudentById_NotFound() {
         when(studentRepositoryPort.findById(999L)).thenReturn(Optional.empty());
         
@@ -79,7 +79,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería crear un estudiante exitosamente")
+    @DisplayName("Should create a student successfully")
     void testCreateStudent() {
         when(studentRepositoryPort.existsByEmail(anyString())).thenReturn(false);
         when(studentRepositoryPort.save(any(Student.class))).thenReturn(testStudent);
@@ -93,10 +93,11 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería lanzar DuplicateEmailException si el email ya existe")
+    @DisplayName("Should throw DuplicateEmailException if email already exists")
+    @SuppressWarnings("null") // MessageSource.getMessage and LocaleContextHolder.getLocale are guaranteed non-null
     void testCreateStudent_DuplicateEmail() {
         when(studentRepositoryPort.existsByEmail(testStudent.getEmail())).thenReturn(true);
-        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Email ya existe");
+        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Email already exists");
         
         assertThrows(DuplicateEmailException.class, () -> {
             studentService.createStudent(testStudent);
@@ -107,7 +108,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería actualizar un estudiante existente")
+    @DisplayName("Should update an existing student")
     void testUpdateStudent() {
         Student updatedStudent = new Student("Pedro", "García", "pedro.garcia@email.com");
         
@@ -123,12 +124,13 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería lanzar StudentNotFoundException al actualizar estudiante inexistente")
+    @DisplayName("Should throw StudentNotFoundException when updating non-existent student")
+    @SuppressWarnings("null") // MessageSource.getMessage and LocaleContextHolder.getLocale are guaranteed non-null
     void testUpdateStudent_NotFound() {
         Student updatedStudent = new Student("Pedro", "García", "pedro.garcia@email.com");
         
         when(studentRepositoryPort.findById(999L)).thenReturn(Optional.empty());
-        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Estudiante no encontrado");
+        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Student not found");
         
         assertThrows(StudentNotFoundException.class, () -> {
             studentService.updateStudent(999L, updatedStudent);
@@ -139,7 +141,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería eliminar un estudiante")
+    @DisplayName("Should delete a student")
     void testDeleteStudent() {
         when(studentRepositoryPort.findById(1L)).thenReturn(Optional.of(testStudent));
         doNothing().when(studentRepositoryPort).deleteById(1L);
@@ -151,10 +153,11 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería lanzar StudentNotFoundException al eliminar estudiante inexistente")
+    @DisplayName("Should throw StudentNotFoundException when deleting non-existent student")
+    @SuppressWarnings("null") // MessageSource.getMessage and LocaleContextHolder.getLocale are guaranteed non-null
     void testDeleteStudent_NotFound() {
         when(studentRepositoryPort.findById(999L)).thenReturn(Optional.empty());
-        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Estudiante no encontrado");
+        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Student not found");
         
         assertThrows(StudentNotFoundException.class, () -> {
             studentService.deleteStudent(999L);
@@ -164,4 +167,5 @@ class StudentServiceTest {
         verify(studentRepositoryPort, never()).deleteById(anyLong());
     }
 }
+
 

@@ -7,12 +7,14 @@ import com.example.course_api.domain.exception.StudentNotFoundException;
 import com.example.course_api.domain.model.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Primary
 @Service
 public class StudentService implements StudentUseCase {
 
@@ -31,31 +33,22 @@ public class StudentService implements StudentUseCase {
     }
 
     @Override
-    public Optional<Student> getStudentById(Long id) {
+    public Optional<Student> getStudentById(final Long id) {
         return studentRepositoryPort.findById(id);
     }
 
     @Override
-    public Student createStudent(Student student) {
-        if (studentRepositoryPort.existsByEmail(student.getEmail())) {
-            String message = messageSource.getMessage("Email.student.unique", null, LocaleContextHolder.getLocale());
-            throw new DuplicateEmailException(student.getEmail(), message);
-        }
+    public Student createStudent(final Student student) {
+        validateEmailNotExists(student.getEmail());
         return studentRepositoryPort.save(student);
     }
 
     @Override
-    public Student updateStudent(Long id, Student student) {
-        Student existing = studentRepositoryPort.findById(id)
-                .orElseThrow(() -> {
-                    String message = messageSource.getMessage("Student.notfound", null, LocaleContextHolder.getLocale());
-                    return new StudentNotFoundException(message);
-                });
-
-        if (!existing.getEmail().equals(student.getEmail()) && 
-            studentRepositoryPort.existsByEmail(student.getEmail())) {
-            String message = messageSource.getMessage("Email.student.unique", null, LocaleContextHolder.getLocale());
-            throw new DuplicateEmailException(student.getEmail(), message);
+    public Student updateStudent(final Long id, final Student student) {
+        final Student existing = findStudentById(id);
+        
+        if (isEmailChanged(existing, student)) {
+            validateEmailNotExists(student.getEmail());
         }
 
         existing.update(student.getFirstName(), student.getLastName(), student.getEmail());
@@ -63,12 +56,35 @@ public class StudentService implements StudentUseCase {
     }
 
     @Override
-    public void deleteStudent(Long id) {
-        if (!studentRepositoryPort.findById(id).isPresent()) {
-            String message = messageSource.getMessage("Student.notfound", null, LocaleContextHolder.getLocale());
-            throw new StudentNotFoundException(message);
-        }
+    public void deleteStudent(final Long id) {
+        findStudentById(id);
         studentRepositoryPort.deleteById(id);
     }
+    
+    private void validateEmailNotExists(final String email) {
+        if (studentRepositoryPort.existsByEmail(email)) {
+            final String message = getLocalizedMessage("Email.student.unique");
+            throw new DuplicateEmailException(email, message);
+        }
+    }
+    
+    private Student findStudentById(final Long id) {
+        return studentRepositoryPort.findById(id)
+                .orElseThrow(this::createStudentNotFoundException);
+    }
+    
+    private StudentNotFoundException createStudentNotFoundException() {
+        final String message = getLocalizedMessage("Student.notfound");
+        return new StudentNotFoundException(message);
+    }
+    
+    private boolean isEmailChanged(final Student existing, final Student updated) {
+        return !existing.getEmail().equals(updated.getEmail());
+    }
+    
+    private String getLocalizedMessage(final String code) {
+        return messageSource.getMessage(code, null, LocaleContextHolder.getLocale());
+    }
 }
+
 

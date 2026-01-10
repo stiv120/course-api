@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Tests para StudentRepositoryAdapter (Arquitectura Hexagonal)")
+@DisplayName("Tests for StudentRepositoryAdapter (Hexagonal Architecture)")
 class StudentRepositoryAdapterTest {
 
     @Mock
@@ -42,7 +42,8 @@ class StudentRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Debería guardar un estudiante y retornar el modelo de dominio")
+    @DisplayName("Should save a student and return domain model")
+    @SuppressWarnings("null") // Spring Data JPA save() contract guarantees non-null return
     void testSave() {
         when(studentJpaRepository.save(any(StudentJpaEntity.class))).thenReturn(testEntity);
 
@@ -55,7 +56,8 @@ class StudentRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Debería encontrar un estudiante por ID")
+    @DisplayName("Should find a student by ID")
+    @SuppressWarnings("null") // Optional.of() guarantees non-null value, Long literal is non-null
     void testFindById() {
         when(studentJpaRepository.findById(1L)).thenReturn(Optional.of(testEntity));
 
@@ -67,7 +69,7 @@ class StudentRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Debería retornar Optional vacío si no existe")
+    @DisplayName("Should return empty Optional if not found")
     void testFindById_NotFound() {
         when(studentJpaRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -77,7 +79,7 @@ class StudentRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Debería encontrar todos los estudiantes")
+    @DisplayName("Should find all students")
     void testFindAll() {
         List<StudentJpaEntity> entities = Arrays.asList(testEntity);
         when(studentJpaRepository.findAll()).thenReturn(entities);
@@ -90,7 +92,7 @@ class StudentRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Debería eliminar un estudiante")
+    @DisplayName("Should delete a student")
     void testDeleteById() {
         doNothing().when(studentJpaRepository).deleteById(1L);
 
@@ -100,7 +102,7 @@ class StudentRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Debería verificar si un email existe")
+    @DisplayName("Should verify if an email exists")
     void testExistsByEmail() {
         when(studentJpaRepository.existsByEmail("juan.perez@email.com")).thenReturn(true);
         when(studentJpaRepository.existsByEmail("otro@email.com")).thenReturn(false);
@@ -109,4 +111,3 @@ class StudentRepositoryAdapterTest {
         assertFalse(studentRepositoryAdapter.existsByEmail("otro@email.com"));
     }
 }
-

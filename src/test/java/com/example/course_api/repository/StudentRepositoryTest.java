@@ -14,7 +14,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@DisplayName("Tests para StudentRepository")
+@DisplayName("Tests for StudentRepository")
 class StudentRepositoryTest {
 
     @Autowired
@@ -34,10 +34,11 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería guardar un estudiante correctamente")
+    @DisplayName("Should save a student correctly")
     void testSaveStudent() {
+        @SuppressWarnings("null") // Spring Data JPA save() contract guarantees non-null return
         Student saved = studentRepository.save(testStudent);
-
+        assertNotNull(saved);
         assertNotNull(saved.getStudentId());
         assertEquals("Juan", saved.getFirstName());
         assertEquals("Pérez", saved.getLastName());
@@ -45,19 +46,22 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería encontrar un estudiante por ID")
+    @DisplayName("Should find a student by ID")
     void testFindById() {
         Student saved = entityManager.persistAndFlush(testStudent);
+        assertNotNull(saved);
+        Long studentId = saved.getStudentId();
+        assertNotNull(studentId);
 
-        Optional<Student> found = studentRepository.findById(saved.getStudentId());
+        Optional<Student> found = studentRepository.findById(studentId);
 
         assertTrue(found.isPresent());
         assertEquals("Juan", found.get().getFirstName());
-        assertEquals(saved.getStudentId(), found.get().getStudentId());
+        assertEquals(studentId, found.get().getStudentId());
     }
 
     @Test
-    @DisplayName("Debería retornar Optional vacío si el estudiante no existe")
+    @DisplayName("Should return empty Optional if student does not exist")
     void testFindById_NotFound() {
         Optional<Student> found = studentRepository.findById(999L);
 
@@ -65,7 +69,7 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería encontrar todos los estudiantes")
+    @DisplayName("Should find all students")
     void testFindAll() {
         Student student1 = new Student();
         student1.setFirstName("María");
@@ -87,7 +91,7 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería verificar si un email existe")
+    @DisplayName("Should verify if an email exists")
     void testExistsByEmail() {
         entityManager.persistAndFlush(testStudent);
 
@@ -99,13 +103,15 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería actualizar un estudiante existente")
+    @DisplayName("Should update an existing student")
     void testUpdateStudent() {
         Student saved = entityManager.persistAndFlush(testStudent);
+        assertNotNull(saved);
 
         saved.setFirstName("Pedro");
         saved.setLastName("García");
         Student updated = studentRepository.save(saved);
+        assertNotNull(updated);
 
         assertEquals("Pedro", updated.getFirstName());
         assertEquals("García", updated.getLastName());
@@ -113,10 +119,12 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería eliminar un estudiante")
+    @DisplayName("Should delete a student")
     void testDeleteStudent() {
         Student saved = entityManager.persistAndFlush(testStudent);
+        assertNotNull(saved);
         Long studentId = saved.getStudentId();
+        assertNotNull(studentId);
 
         studentRepository.deleteById(studentId);
 
@@ -125,7 +133,7 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería retornar lista vacía cuando no hay estudiantes")
+    @DisplayName("Should return empty list when there are no students")
     void testFindAll_Empty() {
         List<Student> students = studentRepository.findAll();
 
@@ -133,7 +141,7 @@ class StudentRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debería verificar que existsByEmail funciona correctamente")
+    @DisplayName("Should verify that existsByEmail works correctly")
     void testEmailUniqueness() {
         Student student1 = new Student();
         student1.setFirstName("Juan");
@@ -149,4 +157,3 @@ class StudentRepositoryTest {
         assertFalse(notExists);
     }
 }
-

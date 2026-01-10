@@ -4,110 +4,231 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class PrimeNumberWithThreads {
+/**
+ * Parallel prime number finder using concurrent execution.
+ * 
+ * <p>This class demonstrates concurrent programming by distributing
+ * prime number searches across multiple threads.
+ * 
+ * <p>Follows Single Responsibility Principle:
+ * <ul>
+ *   <li>PrimeFinderTask: Finds primes in a specific range</li>
+ *   <li>PrimeNumberWithThreads: Orchestrates parallel execution</li>
+ * </ul>
+ * 
+ * @author Stiven Chávez
+ * @since 2026
+ */
+public final class PrimeNumberWithThreads {
     
-    public static class PrimeFinderTask implements Callable<List<Integer>> {
-        private final int start;
-        private final int end;
-        private final int maxPrimes;
+    private static final int DEFAULT_RANGE_PER_THREAD = 1000;
+    private static final int SHUTDOWN_TIMEOUT_SECONDS = 60;
+    private static final int DISPLAY_LIMIT = 10;
+    
+    private PrimeNumberWithThreads() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+    
+    /**
+     * Task that finds prime numbers within a specific range.
+     * 
+     * <p>This inner class follows Single Responsibility Principle
+     * by only being responsible for finding primes in its assigned range.
+     */
+    public static final class PrimeFinderTask implements Callable<List<Integer>> {
+        private final int startRange;
+        private final int endRange;
+        private final int maximumPrimesToFind;
         
-        public PrimeFinderTask(int start, int end, int maxPrimes) {
-            this.start = start;
-            this.end = end;
-            this.maxPrimes = maxPrimes;
+        /**
+         * Creates a new task to find primes in the specified range.
+         * 
+         * @param startRange the start of the range (inclusive)
+         * @param endRange the end of the range (inclusive)
+         * @param maximumPrimesToFind maximum number of primes to find
+         */
+        public PrimeFinderTask(final int startRange, final int endRange, final int maximumPrimesToFind) {
+            this.startRange = startRange;
+            this.endRange = endRange;
+            this.maximumPrimesToFind = maximumPrimesToFind;
         }
         
         @Override
         public List<Integer> call() {
-            List<Integer> primes = new ArrayList<>();
-            int count = 0;
+            final List<Integer> foundPrimes = findPrimesInRange();
+            logTaskCompletion(foundPrimes.size());
+            return foundPrimes;
+        }
+        
+        private List<Integer> findPrimesInRange() {
+            final List<Integer> primes = new ArrayList<>();
+            int foundCount = 0;
             
-            for (int i = start; i <= end && count < maxPrimes; i++) {
-                if (PrimeNumberGenerator.isPrime(i)) {
-                    primes.add(i);
-                    count++;
+            for (int candidate = startRange; candidate <= endRange && foundCount < maximumPrimesToFind; candidate++) {
+                if (PrimeNumberGenerator.isPrime(candidate)) {
+                    primes.add(candidate);
+                    foundCount++;
                 }
             }
             
-            System.out.println("Thread " + Thread.currentThread().getName() + 
-                             " encontró " + primes.size() + " primos en el rango [" + 
-                             start + ", " + end + "]");
             return primes;
         }
+        
+        private void logTaskCompletion(final int primesFound) {
+            final String threadName = Thread.currentThread().getName();
+            System.out.println(String.format(
+                "Thread %s found %d primes in range [%d, %d]",
+                threadName, primesFound, startRange, endRange
+            ));
+        }
     }
     
-    public static void findPrimesWithThreads(int numberOfThreads, int primesToFind) {
-        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
-        List<Future<List<Integer>>> futures = new ArrayList<>();
+    /**
+     * Finds prime numbers using parallel execution across multiple threads.
+     * 
+     * @param numberOfThreads the number of threads to use
+     * @param primesToFind the target number of primes to find
+     * @return a sorted list of prime numbers found
+     * @throws IllegalArgumentException if numberOfThreads or primesToFind is non-positive
+     */
+    public static List<Integer> findPrimesWithThreads(final int numberOfThreads, final int primesToFind) {
+        validateInputs(numberOfThreads, primesToFind);
         
-        int rangePerThread = 1000;
-        int primesPerThread = primesToFind / numberOfThreads;
-        
-        for (int i = 0; i < numberOfThreads; i++) {
-            int start = i * rangePerThread + 2;
-            int end = (i + 1) * rangePerThread;
-            
-            PrimeFinderTask task = new PrimeFinderTask(start, end, primesPerThread);
-            Future<List<Integer>> future = executor.submit(task);
-            futures.add(future);
-        }
-        
-        List<Integer> allPrimes = new ArrayList<>();
+        final ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         
         try {
-            for (Future<List<Integer>> future : futures) {
-                allPrimes.addAll(future.get());
-            }
+            final List<Future<List<Integer>>> taskFutures = submitPrimeFindingTasks(
+                executorService, numberOfThreads, primesToFind
+            );
             
+            final List<Integer> allPrimes = collectResults(taskFutures);
             allPrimes.sort(Integer::compareTo);
             
-            System.out.println("\n=== RESULTADO FINAL ===");
-            System.out.println("Total de primos encontrados: " + allPrimes.size());
-            System.out.println("Los primeros " + Math.min(10, allPrimes.size()) + " números primos son:");
+            PrimeNumberPrinter.printPrimes(allPrimes.subList(0, Math.min(DISPLAY_LIMIT, allPrimes.size())), 
+                                          allPrimes.size());
             
-            for (int i = 0; i < Math.min(10, allPrimes.size()); i++) {
-                System.out.println((i + 1) + ". " + allPrimes.get(i));
-            }
-            
-        } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error al ejecutar tareas: " + e.getMessage());
-            Thread.currentThread().interrupt();
+            return allPrimes;
         } finally {
-            executor.shutdown();
+            shutdownExecutorSafely(executorService);
+        }
+    }
+    
+    private static void validateInputs(final int numberOfThreads, final int primesToFind) {
+        if (numberOfThreads <= 0) {
+            throw new IllegalArgumentException("Number of threads must be positive, but was: " + numberOfThreads);
+        }
+        if (primesToFind <= 0) {
+            throw new IllegalArgumentException("Primes to find must be positive, but was: " + primesToFind);
+        }
+    }
+    
+    private static List<Future<List<Integer>>> submitPrimeFindingTasks(
+            final ExecutorService executor,
+            final int numberOfThreads,
+            final int primesToFind) {
+        
+        final List<Future<List<Integer>>> futures = new ArrayList<>();
+        final int primesPerThread = primesToFind / numberOfThreads;
+        
+        for (int threadIndex = 0; threadIndex < numberOfThreads; threadIndex++) {
+            final int startRange = calculateStartRange(threadIndex);
+            final int endRange = calculateEndRange(threadIndex);
+            
+            final PrimeFinderTask task = new PrimeFinderTask(startRange, endRange, primesPerThread);
+            futures.add(executor.submit(task));
+        }
+        
+        return futures;
+    }
+    
+    private static int calculateStartRange(final int threadIndex) {
+        return threadIndex * DEFAULT_RANGE_PER_THREAD + FIRST_PRIME_NUMBER;
+    }
+    
+    private static int calculateEndRange(final int threadIndex) {
+        return (threadIndex + 1) * DEFAULT_RANGE_PER_THREAD;
+    }
+    
+    private static List<Integer> collectResults(final List<Future<List<Integer>>> futures) {
+        final List<Integer> allPrimes = new ArrayList<>();
+        
+        for (final Future<List<Integer>> future : futures) {
             try {
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    executor.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                executor.shutdownNow();
+                allPrimes.addAll(future.get());
+            } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
+                throw new RuntimeException("Task execution was interrupted", e);
+            } catch (final ExecutionException e) {
+                throw new RuntimeException("Error executing prime finding task", e);
             }
         }
+        
+        return allPrimes;
     }
     
-    public static void findPrimesSequential(int primesToFind) {
-        System.out.println("\n=== BÚSQUEDA SECUENCIAL ===");
-        long startTime = System.currentTimeMillis();
+    private static void shutdownExecutorSafely(final ExecutorService executor) {
+        executor.shutdown();
         
-        List<Integer> primes = PrimeNumberGenerator.generateFirstNPrimes(primesToFind);
-        
-        long endTime = System.currentTimeMillis();
-        System.out.println("Tiempo de ejecución: " + (endTime - startTime) + " ms");
-        System.out.println("Primeros " + primes.size() + " números primos encontrados:");
-        
-        for (int i = 0; i < Math.min(10, primes.size()); i++) {
-            System.out.println((i + 1) + ". " + primes.get(i));
+        try {
+            shutdownExecutor(executor);
+        } catch (final InterruptedException e) {
+            handleInterruption(executor);
         }
     }
     
-    public static void main(String[] args) {
-        System.out.println("=== EJEMPLO DE NÚMEROS PRIMOS CON HILOS ===\n");
+    private static void shutdownExecutor(final ExecutorService executor) throws InterruptedException {
+        if (!executor.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            executor.shutdownNow();
+        }
+    }
+    
+    private static void handleInterruption(final ExecutorService executor) {
+        executor.shutdownNow();
+        Thread.currentThread().interrupt();
+    }
+    
+    private static final int FIRST_PRIME_NUMBER = 2; // First prime number is 2
+    
+    /**
+     * Finds prime numbers using sequential execution.
+     * 
+     * <p>Useful for performance comparison with parallel execution.
+     * 
+     * @param primesToFind the number of primes to find
+     * @return a list of the first N prime numbers
+     */
+    public static List<Integer> findPrimesSequential(final int primesToFind) {
+        final long startTime = System.currentTimeMillis();
         
-        System.out.println("1. Búsqueda secuencial:");
+        final List<Integer> primes = PrimeNumberGenerator.generateFirstNPrimes(primesToFind);
+        
+        final long endTime = System.currentTimeMillis();
+        final long executionTime = endTime - startTime;
+        
+        System.out.println("\n=== SEQUENTIAL SEARCH ===");
+        System.out.println("Execution time: " + executionTime + " ms");
+        System.out.println("First " + primes.size() + " prime numbers found:");
+        
+        PrimeNumberPrinter.printPrimes(primes.subList(0, Math.min(DISPLAY_LIMIT, primes.size())), 
+                                       primes.size());
+        
+        return primes;
+    }
+    
+    /**
+     * Main method for demonstration purposes.
+     * 
+     * @param args command line arguments (not used)
+     */
+    public static void main(final String[] args) {
+        System.out.println("=== PRIME NUMBERS EXAMPLE WITH THREADS ===\n");
+        
+        System.out.println("1. Sequential search:");
         findPrimesSequential(10);
         
-        System.out.println("\n2. Búsqueda paralela con 4 threads:");
+        System.out.println("\n2. Parallel search with 4 threads:");
         findPrimesWithThreads(4, 10);
     }
 }
+
 

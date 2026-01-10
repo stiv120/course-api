@@ -27,21 +27,37 @@ public class Student {
     }
 
     private void validate() {
-        if (firstName == null || firstName.trim().isEmpty()) {
+        validateFirstName();
+        validateLastName();
+        validateEmail();
+    }
+
+    private void validateFirstName() {
+        if (isNullOrEmpty(firstName)) {
             throw new IllegalArgumentException("First name is required");
         }
-        if (lastName == null || lastName.trim().isEmpty()) {
+    }
+
+    private void validateLastName() {
+        if (isNullOrEmpty(lastName)) {
             throw new IllegalArgumentException("Last name is required");
         }
-        if (email == null || email.trim().isEmpty()) {
+    }
+
+    private void validateEmail() {
+        if (isNullOrEmpty(email)) {
             throw new IllegalArgumentException("Email is required");
         }
-        if (!isValidEmail(email)) {
+        if (!isValidEmailFormat(email)) {
             throw new IllegalArgumentException("Invalid email format");
         }
     }
 
-    private boolean isValidEmail(String email) {
+    private boolean isNullOrEmpty(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private boolean isValidEmailFormat(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
     }
 
@@ -111,4 +127,5 @@ public class Student {
                 '}';
     }
 }
+
 

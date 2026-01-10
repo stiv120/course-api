@@ -12,7 +12,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Tests para Student Entity")
+@DisplayName("Tests for Student Entity")
 class StudentTest {
 
     private Validator validator;
@@ -24,7 +24,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería crear un estudiante válido")
+    @DisplayName("Should create a valid student")
     void testValidStudent() {
         Student student = new Student();
         student.setFirstName("Juan");
@@ -37,7 +37,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería fallar validación si firstName está vacío")
+    @DisplayName("Should fail validation if firstName is empty")
     void testInvalidStudent_EmptyFirstName() {
         Student student = new Student();
         student.setFirstName("");
@@ -52,7 +52,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería fallar validación si firstName es null")
+    @DisplayName("Should fail validation if firstName is null")
     void testInvalidStudent_NullFirstName() {
         Student student = new Student();
         student.setFirstName(null);
@@ -67,7 +67,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería fallar validación si lastName está vacío")
+    @DisplayName("Should fail validation if lastName is empty")
     void testInvalidStudent_EmptyLastName() {
         Student student = new Student();
         student.setFirstName("Juan");
@@ -82,7 +82,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería fallar validación si email está vacío")
+    @DisplayName("Should fail validation if email is empty")
     void testInvalidStudent_EmptyEmail() {
         Student student = new Student();
         student.setFirstName("Juan");
@@ -97,7 +97,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería fallar validación si email tiene formato inválido")
+    @DisplayName("Should fail validation if email has invalid format")
     void testInvalidStudent_InvalidEmailFormat() {
         Student student = new Student();
         student.setFirstName("Juan");
@@ -112,7 +112,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería aceptar email con formato válido")
+    @DisplayName("Should accept email with valid format")
     void testValidStudent_ValidEmailFormats() {
         String[] validEmails = {
                 "test@email.com",
@@ -129,13 +129,13 @@ class StudentTest {
 
             Set<ConstraintViolation<Student>> violations = validator.validate(student);
 
-            assertTrue(violations.isEmpty(), 
-                    "Email " + email + " debería ser válido");
+            assertTrue(violations.isEmpty(),
+                    "Email " + email + " should be valid");
         }
     }
 
     @Test
-    @DisplayName("Debería tener getters y setters funcionando correctamente")
+    @DisplayName("Should have getters and setters working correctly")
     void testGettersAndSetters() {
         Student student = new Student();
         student.setStudentId(1L);
@@ -149,4 +149,3 @@ class StudentTest {
         assertEquals("juan.perez@email.com", student.getEmail());
     }
 }
-

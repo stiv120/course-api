@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Tests para StudentService")
+@DisplayName("Tests for StudentService")
 class StudentServiceTest {
     
     @Mock
@@ -45,7 +45,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería retornar todos los estudiantes")
+    @DisplayName("Should return all students")
     void testGetStudents() {
         List<Student> students = Arrays.asList(testStudent);
         when(studentRepository.findAll()).thenReturn(students);
@@ -58,7 +58,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería retornar un estudiante por ID")
+    @DisplayName("Should return a student by ID")
     void testGetStudent() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
         
@@ -70,7 +70,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería retornar Optional vacío si el estudiante no existe")
+    @DisplayName("Should return empty Optional if student does not exist")
     void testGetStudent_NotFound() {
         when(studentRepository.findById(999L)).thenReturn(Optional.empty());
         
@@ -81,7 +81,8 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería crear un estudiante exitosamente")
+    @DisplayName("Should create a student successfully")
+    @SuppressWarnings("null") // Spring Data JPA save() contract guarantees non-null return
     void testCreateStudent() {
         when(studentRepository.existsByEmail(anyString())).thenReturn(false);
         when(studentRepository.save(any(Student.class))).thenReturn(testStudent);
@@ -95,10 +96,11 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería lanzar excepción si el email ya existe")
+    @DisplayName("Should throw exception if email already exists")
+    @SuppressWarnings("null") // MessageSource.getMessage and LocaleContextHolder.getLocale are guaranteed non-null
     void testCreateStudent_DuplicateEmail() {
         when(studentRepository.existsByEmail(testStudent.getEmail())).thenReturn(true);
-        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Email ya existe");
+        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Email already exists");
         
         assertThrows(IllegalArgumentException.class, () -> {
             studentService.createStudent(testStudent);
@@ -109,7 +111,8 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería actualizar un estudiante existente")
+    @DisplayName("Should update an existing student")
+    @SuppressWarnings("null") // Spring Data JPA save() contract guarantees non-null return
     void testUpdateStudent() {
         Student updatedStudent = new Student();
         updatedStudent.setFirstName("Pedro");
@@ -128,10 +131,11 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería lanzar excepción al actualizar estudiante inexistente")
+    @DisplayName("Should throw exception when updating non-existent student")
+    @SuppressWarnings("null") // MessageSource.getMessage and LocaleContextHolder.getLocale are guaranteed non-null
     void testUpdateStudent_NotFound() {
         when(studentRepository.findById(999L)).thenReturn(Optional.empty());
-        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Estudiante no encontrado");
+        when(messageSource.getMessage(anyString(), any(), any())).thenReturn("Student not found");
         
         assertThrows(IllegalArgumentException.class, () -> {
             studentService.updateStudent(999L, testStudent);
@@ -142,7 +146,7 @@ class StudentServiceTest {
     }
     
     @Test
-    @DisplayName("Debería eliminar un estudiante")
+    @DisplayName("Should delete a student")
     void testDelete() {
         doNothing().when(studentRepository).deleteById(1L);
         
@@ -151,4 +155,3 @@ class StudentServiceTest {
         verify(studentRepository, times(1)).deleteById(1L);
     }
 }
-

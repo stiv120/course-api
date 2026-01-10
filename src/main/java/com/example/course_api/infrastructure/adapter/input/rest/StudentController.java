@@ -5,6 +5,7 @@ import com.example.course_api.domain.model.Student;
 import com.example.course_api.infrastructure.adapter.input.rest.dto.StudentRequest;
 import com.example.course_api.infrastructure.adapter.input.rest.dto.StudentResponse;
 import jakarta.validation.Valid;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Primary
 @RestController
 @RequestMapping(path = "api/v1/students")
 public class StudentController {
@@ -68,4 +70,5 @@ public class StudentController {
         );
     }
 }
+
 

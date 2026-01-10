@@ -16,32 +16,45 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        final Map<String, String> errors = buildValidationErrors(ex);
+        return buildErrorResponse(errors, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
-        Map<String, String> errors = new HashMap<>();
-        errors.put("error", ex.getMessage());
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        final Map<String, String> errors = buildSingleError("email", ex.getMessage());
+        return buildErrorResponse(errors, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(StudentNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleStudentNotFoundException(StudentNotFoundException ex) {
-        Map<String, String> errors = new HashMap<>();
-        errors.put("error", ex.getMessage());
-        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+        final Map<String, String> errors = buildSingleError("error", ex.getMessage());
+        return buildErrorResponse(errors, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<Map<String, String>> handleDuplicateEmailException(DuplicateEmailException ex) {
-        Map<String, String> errors = new HashMap<>();
-        errors.put("email", ex.getMessage());
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        final Map<String, String> errors = buildSingleError("email", ex.getMessage());
+        return buildErrorResponse(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    private Map<String, String> buildValidationErrors(final MethodArgumentNotValidException ex) {
+        final Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+        return errors;
+    }
+
+    private Map<String, String> buildSingleError(final String key, final String message) {
+        final Map<String, String> errors = new HashMap<>();
+        errors.put(key, message);
+        return errors;
+    }
+
+    private ResponseEntity<Map<String, String>> buildErrorResponse(final Map<String, String> errors, final HttpStatus status) {
+        return new ResponseEntity<>(errors, status);
     }
 }
+
 

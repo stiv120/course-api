@@ -3,106 +3,243 @@ package com.example.course_api.exceptions;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class ExceptionHandlingExamples {
+/**
+ * Examples demonstrating proper exception handling following Clean Code principles.
+ * 
+ * <p>This class demonstrates:
+ * <ul>
+ *   <li>Basic exception handling</li>
+ *   <li>Multiple catch blocks</li>
+ *   <li>Finally blocks</li>
+ *   <li>Checked and unchecked exceptions</li>
+ *   <li>Custom exceptions</li>
+ *   <li>Try-with-resources</li>
+ * </ul>
+ * 
+ * @author Stiven Chávez
+ * @since 2026
+ */
+public final class ExceptionHandlingExamples {
+    
+    private static final String DEFAULT_FILE_PATH = "archivo.txt";
+    private static final int MINIMUM_AGE = 18;
+    private static final int DIVISOR = 0;
+    
+    private ExceptionHandlingExamples() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 
-    public void basicExceptionHandling() {
+    /**
+     * Demonstrates basic exception handling for arithmetic operations.
+     * 
+     * <p>Shows how to catch and handle ArithmeticException.
+     */
+    public static void demonstrateBasicExceptionHandling() {
         try {
-            int result = 10 / 0;
-        } catch (ArithmeticException e) {
-            System.out.println("Error: División por cero - " + e.getMessage());
+            performDivision();
+        } catch (final ArithmeticException exception) {
+            System.out.println("Error: Division by zero - " + exception.getMessage());
+        }
+    }
+    
+    private static void performDivision() {
+        final int dividend = 10;
+        @SuppressWarnings("unused") // Result intentionally unused for demonstration
+        final int result = dividend / DIVISOR; // Will throw ArithmeticException
+    }
+
+    /**
+     * Demonstrates multiple catch blocks for handling different exception types.
+     * 
+     * <p>Shows how to handle specific exceptions before general ones.
+     */
+    public static void demonstrateMultipleCatchBlocks() {
+        demonstrateNullPointerExceptionHandling();
+        demonstrateNumberFormatExceptionHandling();
+    }
+    
+    private static void demonstrateNullPointerExceptionHandling() {
+        try {
+            final String nullString = null;
+            // Intentionally accessing null to demonstrate NullPointerException
+            @SuppressWarnings({"unused", "null"}) // Intentionally null for demonstration
+            final int length = nullString.length(); // Will throw NullPointerException
+        } catch (final NullPointerException exception) {
+            System.out.println("Error: Null object - " + exception.getMessage());
+        }
+    }
+    
+    private static void demonstrateNumberFormatExceptionHandling() {
+        try {
+            @SuppressWarnings("unused") // Result intentionally unused for demonstration
+            final int parsedNumber = Integer.parseInt("abc"); // Will throw NumberFormatException
+        } catch (final NumberFormatException exception) {
+            System.out.println("Error: Invalid number format - " + exception.getMessage());
+        } catch (final Exception exception) {
+            System.out.println("General error: " + exception.getMessage());
         }
     }
 
-    public void multipleCatchBlocks() {
+    /**
+     * Demonstrates the finally block which always executes.
+     * 
+     * <p>Useful for cleanup operations like closing resources.
+     */
+    public static void demonstrateFinallyBlock() {
         try {
-            String str = null;
-            int length = str.length();
-            int num = Integer.parseInt("abc");
-        } catch (NullPointerException e) {
-            System.out.println("Error: Objeto nulo - " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Formato de número inválido - " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error general: " + e.getMessage());
-        }
-    }
-
-    public void finallyExample() {
-        try {
-            System.out.println("Ejecutando código...");
-            int result = 10 / 2;
-            System.out.println("Resultado: " + result);
-        } catch (ArithmeticException e) {
-            System.out.println("Error capturado");
+            System.out.println("Executing code...");
+            final int dividend = 10;
+            final int divisor = 2;
+            final int result = dividend / divisor;
+            System.out.println("Result: " + result);
+        } catch (final ArithmeticException exception) {
+            System.out.println("Error caught: " + exception.getMessage());
         } finally {
-            System.out.println("Este código siempre se ejecuta (finally)");
+            System.out.println("This code always executes (finally)");
         }
     }
 
-    public void checkedExceptionExample() {
-        try {
-            FileReader file = new FileReader("archivo.txt");
+    /**
+     * Demonstrates handling checked exceptions (IOException).
+     * 
+     * <p>Checked exceptions must be handled or declared in method signature.
+     * Uses try-with-resources for automatic resource management.
+     */
+    public static void demonstrateCheckedException() {
+        try (final FileReader file = new FileReader(DEFAULT_FILE_PATH)) {
             file.read();
-            file.close();
-        } catch (IOException e) {
-            System.out.println("Error de IO: " + e.getMessage());
+        } catch (final IOException exception) {
+            printIOException(exception);
         }
     }
 
-    public void methodWithThrows() throws IOException {
-        FileReader file = new FileReader("archivo.txt");
-        file.close();
+    /**
+     * Demonstrates declaring exceptions in method signature using throws.
+     * 
+     * @throws IOException if file operations fail
+     */
+    public static void demonstrateMethodWithThrows() throws IOException {
+        try (final FileReader file = new FileReader(DEFAULT_FILE_PATH)) {
+            // File operations
+        }
+    }
+    
+    private static void printIOException(final IOException exception) {
+        System.out.println("IO Error: " + exception.getMessage());
     }
 
-    public void throwCustomException() {
+    /**
+     * Demonstrates throwing and catching custom exceptions.
+     */
+    public static void demonstrateCustomException() {
         try {
             validateAge(15);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error de validación: " + e.getMessage());
+        } catch (final IllegalArgumentException exception) {
+            System.out.println("Validation error: " + exception.getMessage());
         }
     }
 
-    private void validateAge(int age) {
-        if (age < 18) {
-            throw new IllegalArgumentException("La edad debe ser mayor a 18 años");
+    /**
+     * Validates that age meets minimum requirement.
+     * 
+     * @param age the age to validate
+     * @throws IllegalArgumentException if age is below minimum
+     */
+    private static void validateAge(final int age) {
+        if (isAgeBelowMinimum(age)) {
+            throw createAgeValidationException(age);
         }
     }
+    
+    private static boolean isAgeBelowMinimum(final int age) {
+        return age < MINIMUM_AGE;
+    }
+    
+    private static IllegalArgumentException createAgeValidationException(final int age) {
+        final String message = String.format("Age must be at least %d years, but was: %d", MINIMUM_AGE, age);
+        return new IllegalArgumentException(message);
+    }
 
-    static class StudentNotFoundException extends Exception {
-        public StudentNotFoundException(String message) {
+    /**
+     * Custom exception for when a student is not found.
+     * 
+     * <p>Following Clean Code: Custom exceptions should provide meaningful context.
+     */
+    static final class StudentNotFoundException extends Exception {
+        private static final long serialVersionUID = 1L;
+        
+        StudentNotFoundException(final String message) {
             super(message);
         }
     }
 
-    public void customExceptionExample() {
+    /**
+     * Demonstrates creating and throwing custom exceptions.
+     */
+    public static void demonstrateCustomExceptionExample() {
         try {
             findStudent(999L);
-        } catch (StudentNotFoundException e) {
-            System.out.println("Estudiante no encontrado: " + e.getMessage());
+        } catch (final StudentNotFoundException exception) {
+            System.out.println("Student not found: " + exception.getMessage());
         }
     }
 
-    private void findStudent(Long id) throws StudentNotFoundException {
-        if (id == null || id < 1) {
-            throw new StudentNotFoundException("ID de estudiante inválido: " + id);
+    /**
+     * Simulates finding a student by ID.
+     * 
+     * @param studentId the student ID to search for
+     * @throws StudentNotFoundException if student ID is invalid or student not found
+     */
+    private static void findStudent(final Long studentId) throws StudentNotFoundException {
+        if (isInvalidStudentId(studentId)) {
+            throw createStudentNotFoundException(studentId);
         }
+        // Student lookup logic would go here
+    }
+    
+    private static boolean isInvalidStudentId(final Long studentId) {
+        return studentId == null || studentId < 1;
+    }
+    
+    private static StudentNotFoundException createStudentNotFoundException(final Long studentId) {
+        return new StudentNotFoundException("Invalid student ID: " + studentId);
     }
 
-    public void tryWithResourcesExample() {
-        try (FileReader file = new FileReader("archivo.txt")) {
+    /**
+     * Demonstrates try-with-resources for automatic resource management.
+     * 
+     * <p>Resources are automatically closed even if exceptions occur.
+     * This is preferred over manual resource management.
+     */
+    public static void demonstrateTryWithResources() {
+        try (final FileReader file = new FileReader(DEFAULT_FILE_PATH)) {
             file.read();
-        } catch (IOException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (final IOException exception) {
+            printResourceException(exception);
         }
     }
+    
+    private static void printResourceException(final IOException exception) {
+        System.out.println("Error: " + exception.getMessage());
+    }
 
-    public void finalVsFinally() {
+    /**
+     * Demonstrates the difference between 'final' keyword and 'finally' block.
+     * 
+     * <ul>
+     *   <li><b>final</b>: Makes variables, methods, or classes immutable/unchangeable</li>
+     *   <li><b>finally</b>: Block that always executes in try-catch structures</li>
+     * </ul>
+     */
+    public static void demonstrateFinalVsFinally() {
         final int constant = 100;
+        // Demonstrating final keyword - value cannot be reassigned
+        System.out.println("Constant value: " + constant);
         
         try {
-            System.out.println("Código");
+            System.out.println("Executing code in try block");
         } finally {
-            System.out.println("Siempre se ejecuta");
+            System.out.println("Always executes (finally block)");
         }
     }
 }

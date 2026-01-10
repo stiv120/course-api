@@ -21,3 +21,4 @@ public class StudentJpaEntity {
     private String email;
 }
 
+

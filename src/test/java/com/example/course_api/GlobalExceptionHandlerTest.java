@@ -2,6 +2,7 @@ package com.example.course_api;
 
 import com.example.course_api.controller.StudentController;
 import com.example.course_api.entity.Student;
+import com.example.course_api.infrastructure.adapter.input.rest.exception.GlobalExceptionHandler;
 import com.example.course_api.service.StudentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import com.example.course_api.controller.ControllerTestConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,8 +21,15 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(StudentController.class)
-@DisplayName("Tests para GlobalExceptionHandler")
+@WebMvcTest(
+        controllers = StudentController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+        },
+        properties = {"app.controller.enabled=true"}
+)
+@Import({GlobalExceptionHandler.class, ControllerTestConfiguration.class})
+@DisplayName("Tests for GlobalExceptionHandler")
 class GlobalExceptionHandlerTest {
 
     @Autowired
@@ -42,12 +52,13 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Debería manejar MethodArgumentNotValidException - campos vacíos")
+    @DisplayName("Should handle MethodArgumentNotValidException - empty fields")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testHandleValidationException_EmptyFields() throws Exception {
         Student invalidStudent = new Student();
-        invalidStudent.setFirstName(""); // Campo vacío
-        invalidStudent.setLastName(""); // Campo vacío
-        invalidStudent.setEmail(""); // Campo vacío
+        invalidStudent.setFirstName("");
+        invalidStudent.setLastName("");
+        invalidStudent.setEmail("");
 
         mockMvc.perform(post("/api/v1/students")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -61,12 +72,13 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Debería manejar MethodArgumentNotValidException - email inválido")
+    @DisplayName("Should handle MethodArgumentNotValidException - invalid email")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testHandleValidationException_InvalidEmail() throws Exception {
         Student invalidStudent = new Student();
         invalidStudent.setFirstName("Juan");
         invalidStudent.setLastName("Pérez");
-        invalidStudent.setEmail("invalid-email"); // Email inválido
+        invalidStudent.setEmail("invalid-email");
 
         mockMvc.perform(post("/api/v1/students")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,40 +90,43 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Debería manejar IllegalArgumentException - email duplicado")
+    @DisplayName("Should handle IllegalArgumentException - duplicate email")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testHandleIllegalArgumentException_DuplicateEmail() throws Exception {
         when(studentService.createStudent(any(Student.class)))
-                .thenThrow(new IllegalArgumentException("Email ya existe"));
+                .thenThrow(new IllegalArgumentException("Email already exists"));
 
         mockMvc.perform(post("/api/v1/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testStudent)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email").value("Email ya existe"));
+                .andExpect(jsonPath("$.email").value("Email already exists"));
 
         verify(studentService, times(1)).createStudent(any(Student.class));
     }
 
     @Test
-    @DisplayName("Debería manejar IllegalArgumentException - estudiante no encontrado")
+    @DisplayName("Should handle IllegalArgumentException - student not found")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testHandleIllegalArgumentException_StudentNotFound() throws Exception {
         when(studentService.updateStudent(anyLong(), any(Student.class)))
-                .thenThrow(new IllegalArgumentException("Estudiante no encontrado"));
+                .thenThrow(new IllegalArgumentException("Student not found"));
 
         mockMvc.perform(put("/api/v1/students/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testStudent)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email").value("Estudiante no encontrado"));
+                .andExpect(jsonPath("$.email").value("Student not found"));
 
         verify(studentService, times(1)).updateStudent(anyLong(), any(Student.class));
     }
 
     @Test
-    @DisplayName("Debería manejar validación en PUT request")
+    @DisplayName("Should handle validation in PUT request")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testHandleValidationException_PutRequest() throws Exception {
         Student invalidStudent = new Student();
-        invalidStudent.setFirstName(""); // Campo vacío
+        invalidStudent.setFirstName("");
         invalidStudent.setEmail("invalid-email");
 
         mockMvc.perform(put("/api/v1/students/1")
@@ -125,7 +140,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Debería retornar múltiples errores de validación")
+    @DisplayName("Should return multiple validation errors")
+    @SuppressWarnings("null") // MediaType and ObjectMapper.writeValueAsString are guaranteed non-null
     void testHandleValidationException_MultipleErrors() throws Exception {
         Student invalidStudent = new Student();
         invalidStudent.setFirstName(null);
@@ -141,4 +157,3 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.email").exists());
     }
 }
-

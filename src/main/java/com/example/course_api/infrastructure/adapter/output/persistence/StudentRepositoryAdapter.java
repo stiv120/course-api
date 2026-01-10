@@ -18,6 +18,7 @@ public class StudentRepositoryAdapter implements StudentRepositoryPort {
     }
 
     @Override
+    @SuppressWarnings("null") // Spring Data JPA save() contract guarantees non-null return
     public Student save(Student student) {
         StudentJpaEntity entity = toJpaEntity(student);
         StudentJpaEntity saved = studentJpaRepository.save(entity);
@@ -25,6 +26,7 @@ public class StudentRepositoryAdapter implements StudentRepositoryPort {
     }
 
     @Override
+    @SuppressWarnings("null") // findById parameter is validated by caller, Long is non-null primitive wrapper
     public Optional<Student> findById(Long id) {
         return studentJpaRepository.findById(id)
                 .map(this::toDomainModel);
@@ -38,6 +40,7 @@ public class StudentRepositoryAdapter implements StudentRepositoryPort {
     }
 
     @Override
+    @SuppressWarnings("null") // deleteById parameter is validated by caller, Long is non-null primitive wrapper
     public void deleteById(Long id) {
         studentJpaRepository.deleteById(id);
     }
@@ -65,4 +68,5 @@ public class StudentRepositoryAdapter implements StudentRepositoryPort {
         );
     }
 }
+
 

@@ -8,3 +8,4 @@ public interface StudentJpaRepository extends JpaRepository<StudentJpaEntity, Lo
     boolean existsByEmail(String email);
 }
 
+

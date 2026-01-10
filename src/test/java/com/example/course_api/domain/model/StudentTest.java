@@ -5,11 +5,11 @@ import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Tests para Student Domain Model (Arquitectura Hexagonal)")
+@DisplayName("Tests for Student Domain Model (Hexagonal Architecture)")
 class StudentTest {
 
     @Test
-    @DisplayName("Debería crear un estudiante válido")
+    @DisplayName("Should create a valid student")
     void testCreateValidStudent() {
         Student student = new Student("Juan", "Pérez", "juan.perez@email.com");
 
@@ -20,7 +20,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería lanzar excepción si firstName está vacío")
+    @DisplayName("Should throw exception if firstName is empty")
     void testCreateStudent_EmptyFirstName() {
         assertThrows(IllegalArgumentException.class, () -> {
             new Student("", "Pérez", "juan.perez@email.com");
@@ -28,7 +28,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería lanzar excepción si lastName está vacío")
+    @DisplayName("Should throw exception if lastName is empty")
     void testCreateStudent_EmptyLastName() {
         assertThrows(IllegalArgumentException.class, () -> {
             new Student("Juan", "", "juan.perez@email.com");
@@ -36,7 +36,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería lanzar excepción si email está vacío")
+    @DisplayName("Should throw exception if email is empty")
     void testCreateStudent_EmptyEmail() {
         assertThrows(IllegalArgumentException.class, () -> {
             new Student("Juan", "Pérez", "");
@@ -44,7 +44,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería lanzar excepción si email tiene formato inválido")
+    @DisplayName("Should throw exception if email has invalid format")
     void testCreateStudent_InvalidEmail() {
         assertThrows(IllegalArgumentException.class, () -> {
             new Student("Juan", "Pérez", "invalid-email");
@@ -52,7 +52,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería actualizar un estudiante correctamente")
+    @DisplayName("Should update a student correctly")
     void testUpdateStudent() {
         Student student = new Student(1L, "Juan", "Pérez", "juan.perez@email.com");
 
@@ -64,7 +64,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería lanzar excepción al actualizar con datos inválidos")
+    @DisplayName("Should throw exception when updating with invalid data")
     void testUpdateStudent_InvalidData() {
         Student student = new Student(1L, "Juan", "Pérez", "juan.perez@email.com");
 
@@ -74,7 +74,7 @@ class StudentTest {
     }
 
     @Test
-    @DisplayName("Debería comparar estudiantes por ID y email")
+    @DisplayName("Should compare students by ID and email")
     void testEquals() {
         Student student1 = new Student(1L, "Juan", "Pérez", "juan.perez@email.com");
         Student student2 = new Student(1L, "Pedro", "García", "juan.perez@email.com");
@@ -84,4 +84,3 @@ class StudentTest {
         assertNotEquals(student1, student3);
     }
 }
-
