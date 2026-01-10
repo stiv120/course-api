@@ -1,5 +1,8 @@
 package com.example.course_api.examples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 /**
@@ -13,6 +16,8 @@ import java.util.List;
  * @since 2026
  */
 public final class PrimeNumberPrinter {
+    
+    private static final Logger logger = LoggerFactory.getLogger(PrimeNumberPrinter.class);
     
     private PrimeNumberPrinter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -35,12 +40,12 @@ public final class PrimeNumberPrinter {
      * @param expectedCount the expected count for the header message
      */
     public static void printPrimes(final List<Integer> primeNumbers, final int expectedCount) {
-        System.out.println("The first " + expectedCount + " prime numbers are:");
+        logger.info("Printing first {} prime numbers", expectedCount);
         
         for (int index = 0; index < primeNumbers.size(); index++) {
             final int position = index + 1;
             final int primeNumber = primeNumbers.get(index);
-            System.out.println(position + ". " + primeNumber);
+            logger.info("{}. {}", position, primeNumber);
         }
     }
     

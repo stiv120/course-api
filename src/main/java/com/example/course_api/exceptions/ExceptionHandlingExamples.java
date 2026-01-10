@@ -1,5 +1,8 @@
 package com.example.course_api.exceptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -21,6 +24,7 @@ import java.io.IOException;
  */
 public final class ExceptionHandlingExamples {
     
+    private static final Logger logger = LoggerFactory.getLogger(ExceptionHandlingExamples.class);
     private static final String DEFAULT_FILE_PATH = "archivo.txt";
     private static final int MINIMUM_AGE = 18;
     private static final int DIVISOR = 0;
@@ -38,7 +42,7 @@ public final class ExceptionHandlingExamples {
         try {
             performDivision();
         } catch (final ArithmeticException exception) {
-            System.out.println("Error: Division by zero - " + exception.getMessage());
+            logger.error("Division by zero error", exception);
         }
     }
     
@@ -65,7 +69,7 @@ public final class ExceptionHandlingExamples {
             @SuppressWarnings({"unused", "null"}) // Intentionally null for demonstration
             final int length = nullString.length(); // Will throw NullPointerException
         } catch (final NullPointerException exception) {
-            System.out.println("Error: Null object - " + exception.getMessage());
+            logger.error("Null object accessed", exception);
         }
     }
     
@@ -74,9 +78,9 @@ public final class ExceptionHandlingExamples {
             @SuppressWarnings("unused") // Result intentionally unused for demonstration
             final int parsedNumber = Integer.parseInt("abc"); // Will throw NumberFormatException
         } catch (final NumberFormatException exception) {
-            System.out.println("Error: Invalid number format - " + exception.getMessage());
+            logger.error("Invalid number format", exception);
         } catch (final Exception exception) {
-            System.out.println("General error: " + exception.getMessage());
+            logger.error("General error occurred", exception);
         }
     }
 
@@ -87,15 +91,14 @@ public final class ExceptionHandlingExamples {
      */
     public static void demonstrateFinallyBlock() {
         try {
-            System.out.println("Executing code...");
             final int dividend = 10;
             final int divisor = 2;
             final int result = dividend / divisor;
-            System.out.println("Result: " + result);
+            logger.debug("Division result: {}", result);
         } catch (final ArithmeticException exception) {
-            System.out.println("Error caught: " + exception.getMessage());
+            logger.error("Arithmetic error in finally block demonstration", exception);
         } finally {
-            System.out.println("This code always executes (finally)");
+            logger.debug("Finally block executed");
         }
     }
 
@@ -125,7 +128,7 @@ public final class ExceptionHandlingExamples {
     }
     
     private static void printIOException(final IOException exception) {
-        System.out.println("IO Error: " + exception.getMessage());
+        logger.error("IO Error occurred", exception);
     }
 
     /**
@@ -135,7 +138,7 @@ public final class ExceptionHandlingExamples {
         try {
             validateAge(15);
         } catch (final IllegalArgumentException exception) {
-            System.out.println("Validation error: " + exception.getMessage());
+            logger.error("Validation error: {}", exception.getMessage(), exception);
         }
     }
 
@@ -180,7 +183,7 @@ public final class ExceptionHandlingExamples {
         try {
             findStudent(999L);
         } catch (final StudentNotFoundException exception) {
-            System.out.println("Student not found: " + exception.getMessage());
+            logger.error("Student not found: {}", exception.getMessage(), exception);
         }
     }
 
@@ -220,7 +223,7 @@ public final class ExceptionHandlingExamples {
     }
     
     private static void printResourceException(final IOException exception) {
-        System.out.println("Error: " + exception.getMessage());
+        logger.error("Resource error occurred", exception);
     }
 
     /**
@@ -234,12 +237,12 @@ public final class ExceptionHandlingExamples {
     public static void demonstrateFinalVsFinally() {
         final int constant = 100;
         // Demonstrating final keyword - value cannot be reassigned
-        System.out.println("Constant value: " + constant);
+        logger.debug("Constant value: {}", constant);
         
         try {
-            System.out.println("Executing code in try block");
+            logger.debug("Executing code in try block");
         } finally {
-            System.out.println("Always executes (finally block)");
+            logger.debug("Finally block executed");
         }
     }
 }

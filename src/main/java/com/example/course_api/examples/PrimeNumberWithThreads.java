@@ -1,5 +1,8 @@
 package com.example.course_api.examples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -21,6 +24,7 @@ import java.util.concurrent.*;
  */
 public final class PrimeNumberWithThreads {
     
+    private static final Logger logger = LoggerFactory.getLogger(PrimeNumberWithThreads.class);
     private static final int DEFAULT_RANGE_PER_THREAD = 1000;
     private static final int SHUTDOWN_TIMEOUT_SECONDS = 60;
     private static final int DISPLAY_LIMIT = 10;
@@ -75,11 +79,8 @@ public final class PrimeNumberWithThreads {
         }
         
         private void logTaskCompletion(final int primesFound) {
-            final String threadName = Thread.currentThread().getName();
-            System.out.println(String.format(
-                "Thread %s found %d primes in range [%d, %d]",
-                threadName, primesFound, startRange, endRange
-            ));
+            logger.debug("Thread {} found {} primes in range [{}, {}]", 
+                Thread.currentThread().getName(), primesFound, startRange, endRange);
         }
     }
     
@@ -157,8 +158,10 @@ public final class PrimeNumberWithThreads {
                 allPrimes.addAll(future.get());
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
+                logger.error("Task execution was interrupted", e);
                 throw new RuntimeException("Task execution was interrupted", e);
             } catch (final ExecutionException e) {
+                logger.error("Error executing prime finding task", e);
                 throw new RuntimeException("Error executing prime finding task", e);
             }
         }
@@ -183,6 +186,7 @@ public final class PrimeNumberWithThreads {
     }
     
     private static void handleInterruption(final ExecutorService executor) {
+        logger.warn("Executor shutdown was interrupted, forcing shutdown now");
         executor.shutdownNow();
         Thread.currentThread().interrupt();
     }
@@ -205,29 +209,12 @@ public final class PrimeNumberWithThreads {
         final long endTime = System.currentTimeMillis();
         final long executionTime = endTime - startTime;
         
-        System.out.println("\n=== SEQUENTIAL SEARCH ===");
-        System.out.println("Execution time: " + executionTime + " ms");
-        System.out.println("First " + primes.size() + " prime numbers found:");
+        logger.info("Sequential search completed in {} ms, found {} primes", executionTime, primes.size());
         
         PrimeNumberPrinter.printPrimes(primes.subList(0, Math.min(DISPLAY_LIMIT, primes.size())), 
                                        primes.size());
         
         return primes;
-    }
-    
-    /**
-     * Main method for demonstration purposes.
-     * 
-     * @param args command line arguments (not used)
-     */
-    public static void main(final String[] args) {
-        System.out.println("=== PRIME NUMBERS EXAMPLE WITH THREADS ===\n");
-        
-        System.out.println("1. Sequential search:");
-        findPrimesSequential(10);
-        
-        System.out.println("\n2. Parallel search with 4 threads:");
-        findPrimesWithThreads(4, 10);
     }
 }
 
