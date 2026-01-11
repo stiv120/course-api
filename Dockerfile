@@ -16,11 +16,9 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Install curl for health check
-RUN apk add --no-cache curl
-
-# Create non-root user for security
-RUN addgroup -S spring && adduser -S spring -G spring
+# Install curl, create non-root user, and set ownership (all root operations)
+RUN apk add --no-cache curl && \
+    addgroup -S spring && adduser -S spring -G spring
 
 # Copy JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
