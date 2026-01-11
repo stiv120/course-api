@@ -54,6 +54,7 @@ src/main/java/com/example/course_api/
 - ✅ **Clean Code**: Refactored methods following clean code practices
 - ✅ **Docker Support**: Containerized application with MySQL database
 - ✅ **Professional Logging**: SLF4J logging instead of System.out.println
+- ✅ **Test Isolation**: H2 in-memory database for tests (never touches production DB)
 
 ## 🚀 Technologies
 
@@ -99,6 +100,21 @@ The project includes comprehensive tests for all layers:
 - **Domain Tests**: Unit tests for the domain model
 - **Application Tests**: Use case tests with mocks
 - **Infrastructure Tests**: Adapter tests (repository, controller)
+- **Repository Tests**: Integration tests with H2 in-memory database
+
+### Test Configuration
+
+⚠️ **Important**: Tests are **completely isolated** from the production database. All tests use **H2 in-memory database**, ensuring that:
+
+- ✅ Tests **NEVER** use the real MySQL database
+- ✅ Each test run creates a fresh in-memory database
+- ✅ Data is automatically cleaned up after tests (`create-drop`)
+- ✅ Tests are fast and safe to run anytime
+
+**Configuration files:**
+- `src/test/resources/application-test.properties` - H2 database configuration
+- `@ActiveProfiles("test")` - Ensures test profile is used
+- `@DataJpaTest` - Automatically configures embedded database for repository tests
 
 ### Run Tests
 
@@ -109,7 +125,20 @@ mvn test
 # Specific tests
 mvn test -Dtest=StudentServiceTest
 mvn test -Dtest=StudentTest
+mvn test -Dtest=StudentRepositoryTest
 mvn test -Dtest=StudentRepositoryAdapterTest
+```
+
+### Verify Test Isolation
+
+When running tests, you should see in the logs:
+```
+Starting embedded database: url='jdbc:h2:mem:...'
+```
+
+You should **NOT** see:
+```
+jdbc:mysql://localhost:3306
 ```
 
 ## 🔧 Configuration
